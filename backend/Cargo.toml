@@ -1,5 +1,5 @@
 [package]
-name = "envshare-rs"
+name = "envshare-rs-backend"
 authors = ["0xrusowsky"]
 version = "0.1.0"
 edition = "2021"
