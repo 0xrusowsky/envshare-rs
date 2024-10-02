@@ -1,82 +1,40 @@
-// use crate::components::editor::frame::FrameComponent;
-use crate::components::{editor::frame::FrameComponent, theme::ThemeComponent};
-
-use gloo::events::EventListener;
-use gloo::timers::callback::Timeout;
-use web_sys::wasm_bindgen::JsCast;
-use web_sys::{HtmlElement, KeyboardEvent, Window};
-use yew::{prelude::*, Component};
+use crate::components::{editor::static_block::StaticBlockComponent, theme::ThemeComponent};
+use yew::prelude::*;
 
 pub enum Msg {
     SwitchTheme(bool),
-    // CheckForSearchAction(KeyboardEvent),
-    LandingOff,
-    GoToLanding,
-    GoToeditor,
 }
 
-pub struct App {
+#[derive(Properties, Clone, PartialEq)]
+pub struct UnsealProps {
+    pub seed: String,
+}
+
+pub struct Unseal {
     dark_mode: bool,
-    work_mode: bool,
-    landing_ref: NodeRef,
-    editor_ref: NodeRef,
-    kbd_listener: Option<EventListener>,
-    _timeout: Option<Timeout>,
 }
 
-impl App {
+impl Unseal {
     fn is_dark_mode(&self) -> bool {
         self.dark_mode
     }
 }
 
-impl Component for App {
+impl Component for Unseal {
     type Message = Msg;
-    type Properties = ();
+    type Properties = UnsealProps;
 
-    fn create(ctx: &Context<Self>) -> Self {
-        Self {
-            dark_mode: true,
-            work_mode: false,
-            landing_ref: NodeRef::default(),
-            editor_ref: NodeRef::default(),
-            kbd_listener: None,
-            _timeout: None,
-        }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Self { dark_mode: true }
     }
 
-    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::SwitchTheme(dark_mode) => {
                 self.dark_mode = dark_mode;
-            }
-            Msg::LandingOff => {
-                self.work_mode = true;
-            }
-            Msg::GoToLanding => {
-                self.work_mode = false;
-                if let Some(landing) = self.landing_ref.cast::<HtmlElement>() {
-                    landing.scroll_into_view();
-                }
-            }
-            Msg::GoToeditor => {
-                if let Some(pg) = self.editor_ref.cast::<HtmlElement>() {
-                    pg.scroll_into_view();
-                }
-                let link = ctx.link().clone();
-                let pg = self.editor_ref.clone();
-                let timeout = Timeout::new(800, move || {
-                    // 0.8sec delay to scroll to editor
-                    if let Some(pg) = pg.cast::<HtmlElement>() {
-                        let _ = pg.focus();
-                    };
-                    link.send_message(Msg::LandingOff);
-                });
-                self._timeout = Some(timeout);
-                return false;
+                true
             }
         }
-        true
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
@@ -84,7 +42,7 @@ impl Component for App {
         <div class={if self.is_dark_mode() { "dark scroll-smooth" } else { "scroll-smooth" }}>
         <div class="w-full flex flex-col bg-gray-100 dark:bg-dark-primary min-h-screen">
             // navbar
-            <button onclick={ctx.link().callback(|_| Msg::GoToLanding)}>
+            // <button onclick={ctx.link().callback(|_| Msg::SwitchTheme)}>
             <div class="w-full bg-gray-100 dark:bg-dark-primary" style="position: fixed; top: 0; z-index: 10;">
             <div class="max-w-md md:max-w-2xl lg:max-w-4xl 2xl:max-w-6xl 4xl:max-w-8xl mx-auto">
             <div class="flex items-center justify-between px-0 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -110,52 +68,16 @@ impl Component for App {
             </div>
             </div>
             </div>
-            </button>
-        // landing
-        if !self.work_mode {
-        <div id="landing" ref={self.landing_ref.clone()} class="bg-gray-100 dark:bg-dark-primary"
-            style="min-height: 100vh; display: flex; flex-direction: column;">
-        <div class="flex-grow flex flex-col justify-between text-gray-800 dark:text-gray-200">
-            <div class="flex flex-grow items-center justify-center">
-            <div class="text-lg max-sm:text-sm text-center">
-                <br/>
-                <br/>
-                <br/>
-                <br/>
-                <h1 class="text-6xl max-sm:text-4xl text-center font-extrabold tracking-wide py-8">
-                    <div class="flex items-center justify-center text-center"><p class="pr-6">{"Share"}</p><p>{"Environment"}</p></div>
-                    <div class="flex items-center justify-center text-center pt-2"><p class="pr-6">{"Variables"}</p><p>{"Securely"}</p></div>
-                </h1>
-                <p class="text-lg max-sm:text-md text-center"> {"Your secret is encrypted in your browser before being stored for a limited period of time and read operations."} </p>
-                <p class="text-lg max-sm:text-md text-center"> {"Unencrypted data never leaves your browser."} </p>
-                <br/>
-                <br/>
-                <br/>
-                <br/>
-                <br/>
-                <div class="flex justify-center py-4"><img src="assets/ferris.svg" class="w-20"/></div>
-                <div class="flex items-center text-center justify-center">
-                    <p>{"Inspired by"}</p><a href="https://envshare.dev" class="font-bold hidden sm:inline pl-1 hover:scale-105">{"EnvShare"}</a>
-                    <p>{", rebuilt from the ground up in"}</p><a href="https://www.rust-lang.org/" class="font-bold pl-1 hover:scale-105">{"Rust"}</a><p>{"."}</p>
-                </div>
-            </div>
-            </div>
-            <div class="p-4 w-full">
-                <a class="transition-all" onclick={ctx.link().callback(|_| Msg::GoToeditor)}>
-                    <button class="btn mx-auto block hover:font-semibold animate-bounce w-100 h-6">
-                        {"Try it out"}
-                    </button>
-                    <svg class="mx-auto animate-bounce w-100 h-6" width="24" height="24" viewBox="0 0 22 22" fill="currentColor"><path d="M12 16a1 1 0 0 1-.64-.23l-6-5a1 1 0 1 1 1.28-1.54L12 13.71l5.36-4.32a1 1 0 0 1 1.41.15 1 1 0 0 1-.14 1.46l-6 4.83A1 1 0 0 1 12 16z"/></svg>
-                </a>
-            </div>
-            </div>
-        </div>
-        }
+            // </button>
         // editor
-        <div ref={self.editor_ref.clone()} class="px-3 bg-gray-100 dark:bg-dark-primary md:px-0 flex flex-col">
+        <div class="px-3 bg-gray-100 dark:bg-dark-primary md:px-0 flex flex-col">
         <div class="flex flex-col items-center justify-center w-full space-y-8">
         <div class="w-full max-w-md md:max-w-2xl lg:max-w-4xl 2xl:max-w-6xl 4xl:max-w-8xl 8xl:max-w-10xl">
-            <div id="editor"><FrameComponent focus_ref={self.editor_ref.clone()}/></div>
+            <br />
+            <br />
+            <br />
+            <br />
+            <div class="pb-6"><StaticBlockComponent content={ctx.props().seed.clone()}/></div>
             // footer
             <div class="text-sm text-gray-400 dark:text-gray-600 flex flex-col sm:flex-row justify-center items-center space-x-2 pb-0.5">
                 <p> {"© 2024 envshare-rs"} </p>

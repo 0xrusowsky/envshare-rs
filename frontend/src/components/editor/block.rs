@@ -11,6 +11,7 @@ pub enum Msg {
 #[derive(Properties, PartialEq)]
 pub struct BlockProps {
     pub textarea_ref: NodeRef,
+    pub on_input: Callback<String>,
 }
 
 #[derive(Debug)]
@@ -37,6 +38,8 @@ impl Component for BlockComponent {
             Msg::InputChanged(input) => {
                 self.initialized = true;
                 self.input = input;
+                ctx.props().on_input.emit(self.input.get_value().to_owned());
+
                 // Manually resize textarea to avoid scrollbars
                 if let Some(textarea) = ctx.props().textarea_ref.cast::<HtmlTextAreaElement>() {
                     match textarea.remove_attribute("style") {
