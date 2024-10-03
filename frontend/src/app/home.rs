@@ -32,7 +32,7 @@ impl Component for Home {
     type Message = Msg;
     type Properties = ();
 
-    fn create(ctx: &Context<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         Self {
             dark_mode: true,
             work_mode: false,

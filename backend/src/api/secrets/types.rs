@@ -148,7 +148,7 @@ impl Serialize for TrackedSecret {
 
         map.insert("uuid".to_owned(), json!(self.uuid.to_string()));
         map.insert("content".to_owned(), json!(self.content));
-        map.insert("reads".to_owned(), json!(self.reads_left));
+        map.insert("reads_left".to_owned(), json!(self.reads_left));
         map.insert("ttl".to_owned(), json!(self.ttl));
         map.insert("nonce".to_owned(), json!(self.nonce));
 

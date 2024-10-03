@@ -56,7 +56,9 @@ pub async fn post_secret(
             key.extend(cipher_key);
             key.extend_from_slice(secret.uuid().as_bytes());
 
-            Ok(BASE64_STANDARD.encode(key))
+            println!("Key: {:?}", key);
+            println!("UUID: {}", secret.uuid());
+            Ok(BASE64_URL_SAFE.encode(key))
         }
         Err(key_error) => Err(key_error.into()),
     }
@@ -81,7 +83,7 @@ pub async fn get_secret(
     match key_result {
         Ok(_) => {
             // Decode the key and split it into the cipher_key and uuid
-            let key = BASE64_STANDARD
+            let key = BASE64_URL_SAFE
                 .decode(key.as_bytes())
                 .map_err(|_| SecretError::SecretKeyInvalid)?;
             let (cipher_key, uuid) = key.split_at(32);

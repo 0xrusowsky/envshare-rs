@@ -1,6 +1,7 @@
 use crate::components::editor::{button::BackendCallButton, clipboard::ClipboardComponent};
 
 use super::block::BlockComponent;
+use chrono::Utc;
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 use yew::{prelude::*, Component};
 
@@ -112,7 +113,7 @@ impl Component for FrameComponent {
                             </select>
                         </div>
                         <BackendCallButton
-                            ttl={self.ttl_in_seconds()}
+                            ttl={self.ttl_in_unix()}
                             max_reads={self.max_reads}
                             secret={self.secret.clone()}
                             on_response={ctx.link().callback(Msg::UnsealUrl)}
@@ -155,12 +156,14 @@ impl FrameComponent {
         self.unseal_url.is_none()
     }
 
-    fn ttl_in_seconds(&self) -> i64 {
-        match self.ttl_unit.as_str() {
+    fn ttl_in_unix(&self) -> i64 {
+        let ttl_in_seconds = match self.ttl_unit.as_str() {
             "minutes" => self.ttl * 60,
             "hours" => self.ttl * 3600,
             "days" => self.ttl * 86400,
             _ => self.ttl,
-        }
+        };
+
+        Utc::now().timestamp() + ttl_in_seconds
     }
 }

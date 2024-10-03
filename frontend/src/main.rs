@@ -22,7 +22,7 @@ fn switch(route: Route) -> Html {
     match route {
         Route::Home => html! {<Home/>},
         Route::Share => html! {<Home/>},
-        Route::Unseal { id } => html! { <Unseal seed={id}/> },
+        Route::Unseal { id } => html! { <Unseal encoded_key={id}/> },
         Route::NotFound => html! {<p>{"404"}</p>},
     }
 }
